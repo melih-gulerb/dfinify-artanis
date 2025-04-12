@@ -1,9 +1,10 @@
 package routes
 
 import (
+	"artanis/src/handlers"
+	"artanis/src/repositories/projectUserRepository"
 	"database/sql"
-	"divine-shield/src/handlers"
-	"divine-shield/src/repositories/projectUserRepository"
+
 	"github.com/gofiber/fiber/v2"
 )
 
