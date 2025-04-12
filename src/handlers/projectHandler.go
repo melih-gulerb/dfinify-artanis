@@ -7,16 +7,16 @@ import (
 	"artanis/src/models/base"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
-	"artanis/src/repositories"
+	"artanis/src/repositories/projectRepository"
 	"github.com/gofiber/fiber/v2"
 )
 
 type ProjectHandler struct {
-	db  *repositories.ProjectRepository
+	db  *projectRepository.ProjectRepository
 	cfg *configs.Config
 }
 
-func NewProjectHandler(db *repositories.ProjectRepository, cfg *configs.Config) *ProjectHandler {
+func NewProjectHandler(db *projectRepository.ProjectRepository, cfg *configs.Config) *ProjectHandler {
 	return &ProjectHandler{db: db, cfg: cfg}
 }
 

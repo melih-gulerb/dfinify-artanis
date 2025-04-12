@@ -6,16 +6,16 @@ import (
 	"artanis/src/models/base"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
-	"artanis/src/repositories"
+	"artanis/src/repositories/collectionRepository"
 	"github.com/gofiber/fiber/v2"
 )
 
 type CollectionHandler struct {
-	db  *repositories.CollectionRepository
+	db  *collectionRepository.CollectionRepository
 	cfg *configs.Config
 }
 
-func NewCollectionHandler(db *repositories.CollectionRepository, cfg *configs.Config) *CollectionHandler {
+func NewCollectionHandler(db *collectionRepository.CollectionRepository, cfg *configs.Config) *CollectionHandler {
 	return &CollectionHandler{db: db, cfg: cfg}
 }
 

@@ -4,7 +4,9 @@ import (
 	"artanis/src/configs"
 	"artanis/src/handlers"
 	"artanis/src/middlewares"
-	"artanis/src/repositories"
+	"artanis/src/repositories/collectionRepository"
+	"artanis/src/repositories/definitionRepository"
+	"artanis/src/repositories/projectRepository"
 )
 
 func main() {
@@ -12,11 +14,11 @@ func main() {
 	db := configs.InitDB(cfg.MSSQLConnectionString)
 	configs.InitFiber()
 
-	projectRepository := repositories.NewProjectRepository(db)
+	projectRepository := projectRepository.NewProjectRepository(db)
 	projectHandler := handlers.NewProjectHandler(projectRepository, cfg)
-	collectionRepository := repositories.NewCollectionRepository(db)
+	collectionRepository := collectionRepository.NewCollectionRepository(db)
 	collectionHandler := handlers.NewCollectionHandler(collectionRepository, cfg)
-	definitionRepository := repositories.NewDefinitionRepository(db)
+	definitionRepository := definitionRepository.NewDefinitionRepository(db)
 	definitionHandler := handlers.NewDefinitionHandler(definitionRepository, cfg)
 
 	app := configs.InitFiber()

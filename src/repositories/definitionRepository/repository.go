@@ -1,9 +1,8 @@
-package repositories
+package definitionRepository
 
 import (
 	"artanis/src/logging"
 	"artanis/src/models"
-	"artanis/src/repositories/queries"
 	"database/sql"
 )
 
@@ -16,7 +15,7 @@ func NewDefinitionRepository(db *sql.DB) *DefinitionRepository {
 }
 
 func (repo *DefinitionRepository) RegisterDefinition(Definition models.Definition) error {
-	_, err := repo.DB.Exec(queries.RegisterDefinitionQuery(Definition))
+	_, err := repo.DB.Exec(RegisterDefinitionQuery(Definition))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -25,7 +24,7 @@ func (repo *DefinitionRepository) RegisterDefinition(Definition models.Definitio
 }
 
 func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit, offset int) ([]models.Definition, error) {
-	query := queries.PaginateDefinitionsQuery(collectionId, limit, offset)
+	query := PaginateDefinitionsQuery(collectionId, limit, offset)
 	rows, err := repo.DB.Query(query)
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
@@ -58,7 +57,7 @@ func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit
 }
 
 func (repo *DefinitionRepository) UpdateDefinition(id string, name string, value string) error {
-	_, err := repo.DB.Exec(queries.UpdateDefinitionQuery(id, name, value))
+	_, err := repo.DB.Exec(UpdateDefinitionQuery(id, name, value))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -67,7 +66,7 @@ func (repo *DefinitionRepository) UpdateDefinition(id string, name string, value
 }
 
 func (repo *DefinitionRepository) DeleteDefinition(id string) error {
-	_, err := repo.DB.Exec(queries.DeleteDefinitionQuery(id))
+	_, err := repo.DB.Exec(DeleteDefinitionQuery(id))
 	if err != nil {
 	}
 

@@ -1,9 +1,8 @@
-package repositories
+package collectionRepository
 
 import (
 	"artanis/src/logging"
 	"artanis/src/models"
-	"artanis/src/repositories/queries"
 	"database/sql"
 )
 
@@ -16,7 +15,7 @@ func NewCollectionRepository(db *sql.DB) *CollectionRepository {
 }
 
 func (repo *CollectionRepository) RegisterCollection(collection models.Collection) error {
-	_, err := repo.DB.Exec(queries.RegisterCollectionQuery(collection))
+	_, err := repo.DB.Exec(RegisterCollectionQuery(collection))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -25,7 +24,7 @@ func (repo *CollectionRepository) RegisterCollection(collection models.Collectio
 }
 
 func (repo *CollectionRepository) PaginateCollections(projectId string, limit, offset int) ([]models.Collection, error) {
-	query := queries.PaginateCollectionsQuery(projectId, limit, offset)
+	query := PaginateCollectionsQuery(projectId, limit, offset)
 	rows, err := repo.DB.Query(query)
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
@@ -58,7 +57,7 @@ func (repo *CollectionRepository) PaginateCollections(projectId string, limit, o
 }
 
 func (repo *CollectionRepository) UpdateCollection(id string, name string, description string) error {
-	_, err := repo.DB.Exec(queries.UpdateCollectionQuery(id, name, description))
+	_, err := repo.DB.Exec(UpdateCollectionQuery(id, name, description))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -67,7 +66,7 @@ func (repo *CollectionRepository) UpdateCollection(id string, name string, descr
 }
 
 func (repo *CollectionRepository) DeleteCollection(id string) error {
-	_, err := repo.DB.Exec(queries.DeleteCollectionQuery(id))
+	_, err := repo.DB.Exec(DeleteCollectionQuery(id))
 	if err != nil {
 	}
 

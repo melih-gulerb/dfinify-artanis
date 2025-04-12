@@ -6,16 +6,16 @@ import (
 	"artanis/src/models/base"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
-	"artanis/src/repositories"
+	"artanis/src/repositories/definitionRepository"
 	"github.com/gofiber/fiber/v2"
 )
 
 type DefinitionHandler struct {
-	db  *repositories.DefinitionRepository
+	db  *definitionRepository.DefinitionRepository
 	cfg *configs.Config
 }
 
-func NewDefinitionHandler(db *repositories.DefinitionRepository, cfg *configs.Config) *DefinitionHandler {
+func NewDefinitionHandler(db *definitionRepository.DefinitionRepository, cfg *configs.Config) *DefinitionHandler {
 	return &DefinitionHandler{db: db, cfg: cfg}
 }
 

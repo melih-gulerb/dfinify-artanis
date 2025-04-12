@@ -1,4 +1,4 @@
-package queries
+package collectionRepository
 
 import (
 	"artanis/src/models"
