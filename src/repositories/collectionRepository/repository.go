@@ -15,17 +15,22 @@ func NewCollectionRepository(db *sql.DB) *CollectionRepository {
 }
 
 func (repo *CollectionRepository) RegisterCollection(collection models.Collection) error {
-	_, err := repo.DB.Exec(RegisterCollectionQuery(collection))
+	_, err := repo.DB.Exec(RegisterCollectionQuery(),
+		sql.Named("Id", collection.Id),
+		sql.Named("Name", collection.Name),
+		sql.Named("Description", collection.Description),
+		sql.Named("ProjectId", collection.ProjectId))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
-
 	return err
 }
 
 func (repo *CollectionRepository) PaginateCollections(projectId string, limit, offset int) ([]models.Collection, error) {
-	query := PaginateCollectionsQuery(projectId, limit, offset)
-	rows, err := repo.DB.Query(query)
+	rows, err := repo.DB.Query(PaginateCollectionsQuery(),
+		sql.Named("ProjectId", projectId),
+		sql.Named("Limit", limit),
+		sql.Named("Offset", offset))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 		return nil, err
@@ -57,18 +62,20 @@ func (repo *CollectionRepository) PaginateCollections(projectId string, limit, o
 }
 
 func (repo *CollectionRepository) UpdateCollection(id string, name string, description string) error {
-	_, err := repo.DB.Exec(UpdateCollectionQuery(id, name, description))
+	_, err := repo.DB.Exec(UpdateCollectionQuery(),
+		sql.Named("Id", id),
+		sql.Named("Name", name),
+		sql.Named("Description", description))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
-
 	return err
 }
 
 func (repo *CollectionRepository) DeleteCollection(id string) error {
-	_, err := repo.DB.Exec(DeleteCollectionQuery(id))
+	_, err := repo.DB.Exec(DeleteCollectionQuery(), sql.Named("Id", id))
 	if err != nil {
+		logging.Log(logging.ERROR, err.Error())
 	}
-
 	return err
 }

@@ -1,8 +1,8 @@
 package projectUserRepository
 
 import (
+	"artanis/src/models"
 	"database/sql"
-	"divine-shield/src/models"
 )
 
 type ProjectUserRepository struct {
@@ -14,6 +14,6 @@ func NewProjectUserRepository(db *sql.DB) *ProjectUserRepository {
 }
 
 func (repo *ProjectUserRepository) RegisterProjectUser(user models.ProjectUser) error {
-	_, err := repo.DB.Exec(RegisterProjectUserQuery(user))
+	_, err := repo.DB.Exec(RegisterProjectUserQuery())
 	return err
 }

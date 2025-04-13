@@ -14,8 +14,11 @@ func NewDefinitionRepository(db *sql.DB) *DefinitionRepository {
 	return &DefinitionRepository{DB: db}
 }
 
-func (repo *DefinitionRepository) RegisterDefinition(Definition models.Definition) error {
-	_, err := repo.DB.Exec(RegisterDefinitionQuery(Definition))
+func (repo *DefinitionRepository) RegisterDefinition(definition models.Definition) error {
+	_, err := repo.DB.Exec(RegisterDefinitionQuery(),
+		sql.Named("Id", definition.Id),
+		sql.Named("Name", definition.Name),
+		sql.Named("Value", definition.Value))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -24,8 +27,10 @@ func (repo *DefinitionRepository) RegisterDefinition(Definition models.Definitio
 }
 
 func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit, offset int) ([]models.Definition, error) {
-	query := PaginateDefinitionsQuery(collectionId, limit, offset)
-	rows, err := repo.DB.Query(query)
+	rows, err := repo.DB.Query(PaginateDefinitionsQuery(),
+		sql.Named("CollectionId", collectionId),
+		sql.Named("Limit", limit),
+		sql.Named("Offset", offset))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 		return nil, err
@@ -57,7 +62,10 @@ func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit
 }
 
 func (repo *DefinitionRepository) UpdateDefinition(id string, name string, value string) error {
-	_, err := repo.DB.Exec(UpdateDefinitionQuery(id, name, value))
+	_, err := repo.DB.Exec(UpdateDefinitionQuery(),
+		sql.Named("Id", id),
+		sql.Named("Name", name),
+		sql.Named("Value", value))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -66,8 +74,9 @@ func (repo *DefinitionRepository) UpdateDefinition(id string, name string, value
 }
 
 func (repo *DefinitionRepository) DeleteDefinition(id string) error {
-	_, err := repo.DB.Exec(DeleteDefinitionQuery(id))
+	_, err := repo.DB.Exec(DeleteDefinitionQuery(), sql.Named("Id", id))
 	if err != nil {
+		logging.Log(logging.ERROR, err.Error())
 	}
 
 	return err

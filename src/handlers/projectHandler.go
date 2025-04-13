@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/middlewares"
 	"artanis/src/models"
 	"artanis/src/models/base"
 	"artanis/src/models/requests"
@@ -44,7 +43,7 @@ func (h *ProjectHandler) Register(c *fiber.Ctx) error {
 func (h *ProjectHandler) Paginate(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit")
 	offset := c.QueryInt("offset")
-	organizationId, _ := middlewares.ExtractOrganizationID(c)
+	organizationId, _ := c.Locals("organizationId").(string)
 
 	projects, err := h.db.PaginateProjects(organizationId, limit, offset)
 
@@ -85,6 +84,20 @@ func (h *ProjectHandler) Delete(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(base.Response{
 		Success: true,
 		Message: "project successfully deleted",
+	})
+}
+
+func (h *ProjectHandler) GetDashboardCounts(c *fiber.Ctx) error {
+	organizationId := c.Query("organizationId")
+	counts, err := h.db.GetDashboardCounts(organizationId)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(base.Response{
+		Success: true,
+		Message: "counts successfully fetched",
+		Data:    counts,
 	})
 }
 

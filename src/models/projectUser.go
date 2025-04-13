@@ -1,11 +1,13 @@
 package models
 
+import "time"
+
 type ProjectUser struct {
 	Id        string
 	ProjectId string
 	UserId    string
 	RoleId    string
-	CreatedAt string
-	UpdatedAt string
-	DeletedAt string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
 }

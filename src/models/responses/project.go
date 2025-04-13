@@ -13,3 +13,9 @@ type ProjectResponse struct {
 	Description string
 	CreatedAt   time.Time
 }
+
+type DashboardResponse struct {
+	ProjectCount    int
+	CollectionCount int
+	DefinitionCount int
+}

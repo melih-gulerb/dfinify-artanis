@@ -1,35 +1,37 @@
 package collectionRepository
 
-import (
-	"artanis/src/models"
-	"fmt"
-	"strings"
-)
-
-var RegisterCollectionQuery = func(collection models.Collection) string {
-	return fmt.Sprintf("INSERT INTO dbo.Collections (Id, Name, Description) VALUES ('%s', '%s', '%s')", collection.Id, collection.Name, collection.Description)
+var RegisterCollectionQuery = func() string {
+	return `
+INSERT INTO dbo.Collections (Id, Name, Description, ProjectId) 
+VALUES (@Id, @Name, @Description, @ProjectId)
+`
 }
 
-var PaginateCollectionsQuery = func(projectId string, limit, offset int) string {
-	return fmt.Sprintf("SELECT Id, Name, Description FROM dbo.Collections WHERE ProjectId = '%s' AND DeletedAt IS NULL "+
-		"GROUP BY ProjectId, Id, Name, Description ORDER BY CreatedAt DESC OFFSET %d ROWS FETCH NEXT %d ROWS ONLY", projectId, offset, limit)
+var PaginateCollectionsQuery = func() string {
+	return `
+SELECT Id, Name, Description 
+FROM dbo.Collections 
+WHERE ProjectId = @ProjectId 
+  AND DeletedAt IS NULL
+GROUP BY ProjectId, Id, Name, Description 
+ORDER BY CreatedAt DESC 
+OFFSET @Offset ROWS 
+FETCH NEXT @Limit ROWS ONLY
+`
 }
 
-var UpdateCollectionQuery = func(id string, name string, description string) string {
-	query := "UPDATE dbo.Collections SET "
-	var updates []string
-
-	if name != "" {
-		updates = append(updates, fmt.Sprintf("Name = '%s'", name))
-	}
-	if description != "" {
-		updates = append(updates, fmt.Sprintf("Description = '%s'", description))
-	}
-
-	query += fmt.Sprintf("%s WHERE Id = '%s'", strings.Join(updates, ", "), id)
-	return query
+var UpdateCollectionQuery = func() string {
+	return `
+UPDATE dbo.Collections 
+SET Name = @Name, Description = @Description
+WHERE Id = @Id
+`
 }
 
-var DeleteCollectionQuery = func(id string) string {
-	return fmt.Sprintf("UPDATE dbo.Collections SET DeletedAt = GETDATE() WHERE Id = '%s'", id)
+var DeleteCollectionQuery = func() string {
+	return `
+UPDATE dbo.Collections 
+SET DeletedAt = GETDATE() 
+WHERE Id = @Id
+`
 }
