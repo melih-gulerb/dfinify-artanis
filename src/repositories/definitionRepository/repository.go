@@ -81,3 +81,16 @@ func (repo *DefinitionRepository) DeleteDefinition(id string) error {
 
 	return err
 }
+
+func (repo *DefinitionRepository) GetDefinition(id string) *models.Definition {
+	var definition models.Definition
+
+	err := repo.DB.QueryRow(GetDefinitionByIdQuery(), sql.Named("Id", id)).Scan(&definition.Id, &definition.Value,
+		&definition.Name, &definition.CollectionId)
+
+	if err != nil {
+		return nil
+	}
+
+	return &definition
+}

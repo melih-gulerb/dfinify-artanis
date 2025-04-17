@@ -4,19 +4,27 @@ import (
 	"artanis/src/configs"
 	"artanis/src/models"
 	"artanis/src/models/base"
+	"artanis/src/models/clients"
+	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
 	"artanis/src/repositories/definitionRepository"
+	"artanis/src/repositories/projectUserRepository"
+	"artanis/src/services"
+	"errors"
 	"github.com/gofiber/fiber/v2"
 )
 
 type DefinitionHandler struct {
 	db  *definitionRepository.DefinitionRepository
+	pdb *projectUserRepository.ProjectUserRepository
+	ds  *services.DefinitionChangeService
 	cfg *configs.Config
 }
 
-func NewDefinitionHandler(db *definitionRepository.DefinitionRepository, cfg *configs.Config) *DefinitionHandler {
-	return &DefinitionHandler{db: db, cfg: cfg}
+func NewDefinitionHandler(db *definitionRepository.DefinitionRepository, pdb *projectUserRepository.ProjectUserRepository,
+	ds *services.DefinitionChangeService, cfg *configs.Config) *DefinitionHandler {
+	return &DefinitionHandler{db: db, pdb: pdb, ds: ds, cfg: cfg}
 }
 
 func (h *DefinitionHandler) Register(c *fiber.Ctx) error {
@@ -45,7 +53,7 @@ func (h *DefinitionHandler) Paginate(c *fiber.Ctx) error {
 	offset := c.QueryInt("offset")
 	collectionId := c.Params("id")
 
-	Definitions, err := h.db.PaginateDefinitions(collectionId, limit, offset)
+	definitions, err := h.db.PaginateDefinitions(collectionId, limit, offset)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to paginate the definitions"})
@@ -54,7 +62,7 @@ func (h *DefinitionHandler) Paginate(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(base.Response{
 		Success: true,
 		Message: "success",
-		Data:    responses.PaginateDefinitionResponse{DefinitionResponse: mapPaginateDefinitionResponse(Definitions), TotalCount: len(Definitions)},
+		Data:    responses.PaginateDefinitionResponse{DefinitionResponse: mapPaginateDefinitionResponse(definitions), TotalCount: len(definitions)},
 	})
 }
 
@@ -62,6 +70,26 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 	var definitionRequest requests.UpdateDefinition
 	if err := c.BodyParser(&definitionRequest); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+	}
+
+	user := c.Context().UserValue("user").(*clients.User)
+	role, err := h.validateAuth(user.Id, definitionRequest.ProjectId)
+	if err != nil {
+		return err
+	}
+
+	if role == enums.ProjectUser {
+		h.ds.Register(definitionRequest.Id, user.Id, definitionRequest.Value)
+
+		return c.Status(fiber.StatusOK).JSON(base.Response{
+			Success: true,
+			Message: "Definition update change submitted for approval. You will receive an email when it is approved.",
+			Data: responses.DefinitionResponse{
+				Id:    definitionRequest.Id,
+				Name:  definitionRequest.Name,
+				Value: definitionRequest.Value,
+			},
+		})
 	}
 
 	if err := h.db.UpdateDefinition(definitionRequest.Id, definitionRequest.Name, definitionRequest.Value); err != nil {
@@ -97,4 +125,13 @@ func mapPaginateDefinitionResponse(definitions []models.Definition) []responses.
 		})
 	}
 	return DefinitionsResponse
+}
+
+func (h *DefinitionHandler) validateAuth(userId, projectId string) (enums.ProjectRole, error) {
+	projectUser := h.pdb.GetProjectUser(userId, projectId)
+	if projectUser == nil {
+		return 0, errors.New("not enough credentials to create a collection")
+	}
+
+	return *projectUser, nil
 }

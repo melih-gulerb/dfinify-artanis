@@ -35,3 +35,12 @@ SET DeletedAt = GETDATE()
 WHERE Id = @Id
 `
 }
+
+var GetDefinitionByIdQuery = func() string {
+	return `
+SELECT Id, Name, Value, CollectionId, CreatedAt
+FROM dbo.Definitions 
+WHERE Id = @Id 
+  AND DeletedAt IS NULL
+`
+}
