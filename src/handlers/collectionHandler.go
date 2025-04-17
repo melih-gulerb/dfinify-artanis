@@ -4,19 +4,26 @@ import (
 	"artanis/src/configs"
 	"artanis/src/models"
 	"artanis/src/models/base"
+	"artanis/src/models/clients"
+	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
 	"artanis/src/repositories/collectionRepository"
+	"artanis/src/repositories/projectUserRepository"
+	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type CollectionHandler struct {
 	db  *collectionRepository.CollectionRepository
+	pDb projectUserRepository.ProjectUserRepository
 	cfg *configs.Config
 }
 
-func NewCollectionHandler(db *collectionRepository.CollectionRepository, cfg *configs.Config) *CollectionHandler {
-	return &CollectionHandler{db: db, cfg: cfg}
+func NewCollectionHandler(db *collectionRepository.CollectionRepository, pDb projectUserRepository.ProjectUserRepository,
+	cfg *configs.Config) *CollectionHandler {
+	return &CollectionHandler{db: db, pDb: pDb, cfg: cfg}
 }
 
 func (h *CollectionHandler) Register(c *fiber.Ctx) error {
@@ -25,9 +32,16 @@ func (h *CollectionHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
 	}
 
+	user := c.Context().UserValue("user").(*clients.User)
+	if validateAuth := h.ValidateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
+		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+	}
+
 	collection := models.Collection{
+		Id:          uuid.New().String(),
 		Name:        collectionRequest.Name,
 		Description: collectionRequest.Description,
+		ProjectId:   collectionRequest.ProjectId,
 	}
 
 	if err := h.db.RegisterCollection(collection); err != nil {
@@ -44,6 +58,11 @@ func (h *CollectionHandler) Paginate(c *fiber.Ctx) error {
 	limit := c.QueryInt("limit")
 	offset := c.QueryInt("offset")
 	projectId := c.Params("id")
+
+	user := c.Context().UserValue("user").(*clients.User)
+	if validateAuth := h.ValidateAuth(user.Id, projectId); validateAuth != nil {
+		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+	}
 
 	collections, err := h.db.PaginateCollections(projectId, limit, offset)
 
@@ -97,4 +116,13 @@ func mapPaginateCollectionResponse(collections []models.Collection) []responses.
 		})
 	}
 	return collectionsResponse
+}
+
+func (h *CollectionHandler) ValidateAuth(userId, projectId string) error {
+	projectUser := h.pDb.GetProjectUser(userId, projectId)
+	if projectUser == nil || *projectUser == enums.ProjectUser {
+		return errors.New("not enough credentials to create a collection")
+	}
+
+	return nil
 }

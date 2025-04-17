@@ -15,8 +15,8 @@ func SetupProjectRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config) {
 
 	projectGroup := app.Group("/projects")
 
-	projectGroup.Post("/project", projectHandler.Register)
-	projectGroup.Get("/project", projectHandler.Paginate)
-	projectGroup.Put("/project", projectHandler.Update)
-	projectGroup.Delete("/project", projectHandler.Delete)
+	projectGroup.Post("/", projectHandler.Register)
+	projectGroup.Get("/", projectHandler.Paginate)
+	projectGroup.Put("/", projectHandler.Update)
+	projectGroup.Delete("/:id", projectHandler.Delete)
 }

@@ -2,6 +2,7 @@ package configs
 
 import (
 	"artanis/src/logging"
+	"artanis/src/middlewares"
 	"database/sql"
 	"fmt"
 	_ "github.com/denisenkom/go-mssqldb"
@@ -24,7 +25,9 @@ func InitDB(dsn string) *sql.DB {
 }
 
 func InitFiber() *fiber.App {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: middlewares.CustomErrorHandler,
+	})
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.SendString("Artanis is running")
 	})

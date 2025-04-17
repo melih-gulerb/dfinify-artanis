@@ -3,8 +3,8 @@ package enums
 type ProjectRole int
 
 const (
-	ProjectOwner ProjectRole = iota
-	ProjectUser
+	ProjectUser ProjectRole = iota
+	ProjectOwner
 )
 
 func (r ProjectRole) String() string {

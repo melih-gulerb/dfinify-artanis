@@ -1,12 +1,12 @@
 package requests
 
 type RegisterProject struct {
-	Name        string
-	Description string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type UpdateProject struct {
-	Id          string
-	Name        string
-	Description string
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }

@@ -5,6 +5,7 @@ import (
 	"artanis/src/models"
 	"artanis/src/models/responses"
 	"database/sql"
+	"time"
 )
 
 type ProjectRepository struct {
@@ -19,7 +20,8 @@ func (repo *ProjectRepository) RegisterProject(project models.Project) error {
 	_, err := repo.DB.Exec(RegisterProjectQuery(),
 		sql.Named("Id", project.Id),
 		sql.Named("Name", project.Name),
-		sql.Named("Description", project.Description))
+		sql.Named("Description", project.Description),
+		sql.Named("OrganizationId", project.OrganizationId))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -46,7 +48,9 @@ func (repo *ProjectRepository) PaginateProjects(organizationId string, limit, of
 	var projects []models.Project
 	for rows.Next() {
 		var project models.Project
-		err := rows.Scan(&project.Id, &project.Name, &project.Description)
+		var createdAt string
+		err := rows.Scan(&project.Id, &project.Name, &project.Description, &createdAt)
+		project.CreatedAt, err = time.Parse(time.RFC3339, createdAt)
 		if err != nil {
 			logging.Log(logging.ERROR, err.Error())
 			return nil, err

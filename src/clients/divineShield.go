@@ -15,8 +15,9 @@ type DivineShieldClient struct {
 }
 
 type AuthResponse struct {
-	Token string       `json:"token"`
-	User  clients.User `json:"user"`
+	Success bool         `json:"success"`
+	Message string       `json:"message"`
+	User    clients.User `json:"data"`
 }
 
 type AuthRequest struct {
@@ -44,7 +45,7 @@ func (c *DivineShieldClient) Authorize(token string) (*clients.User, error) {
 
 	req, err := http.NewRequest(
 		"POST",
-		fmt.Sprintf("%s/authoriation", c.BaseURL),
+		fmt.Sprintf("%s/authorization", c.BaseURL),
 		bytes.NewBuffer(reqBody),
 	)
 	if err != nil {

@@ -15,8 +15,8 @@ func SetupDefinitionRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config) {
 
 	definitionGroup := app.Group("/definitions")
 
-	definitionGroup.Post("/definition", definitionHandler.Register)
-	definitionGroup.Get("/definition", definitionHandler.Paginate)
-	definitionGroup.Put("/definition", definitionHandler.Update)
-	definitionGroup.Delete("/definition", definitionHandler.Delete)
+	definitionGroup.Post("/", definitionHandler.Register)
+	definitionGroup.Get("/:id", definitionHandler.Paginate)
+	definitionGroup.Put("/", definitionHandler.Update)
+	definitionGroup.Delete("/:id", definitionHandler.Delete)
 }

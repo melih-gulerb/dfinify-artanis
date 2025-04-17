@@ -15,6 +15,7 @@ func main() {
 
 	app := configs.InitFiber()
 	app.Use(middlewares.AuthorizationMiddleware(divineShield))
+	app.Use(middlewares.PanicRecoveryMiddleware())
 
 	routes.SetupProjectRoutes(app, db, cfg)
 	routes.SetupCollectionRoutes(app, db, cfg)

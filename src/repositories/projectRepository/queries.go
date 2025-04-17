@@ -2,18 +2,18 @@ package projectRepository
 
 var RegisterProjectQuery = func() string {
 	return `
-INSERT INTO dbo.Projects (Id, Name, Description) 
-VALUES (@Id, @Name, @Description)
+INSERT INTO dbo.Projects (Id, Name, Description, OrganizationId) 
+VALUES (@Id, @Name, @Description, @OrganizationId)
 `
 }
 
 var PaginateProjectsQuery = func() string {
 	return `
-SELECT Id, Name, Description 
+SELECT Id, Name, Description, CreatedAt
 FROM dbo.Projects 
 WHERE OrganizationId = @OrganizationId 
   AND DeletedAt IS NULL
-GROUP BY OrganizationId, Id, Name, Description 
+GROUP BY OrganizationId, Id, Name, Description, CreatedAt 
 ORDER BY CreatedAt DESC 
 OFFSET @Offset ROWS 
 FETCH NEXT @Limit ROWS ONLY

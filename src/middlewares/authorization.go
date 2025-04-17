@@ -30,7 +30,7 @@ func AuthorizationMiddleware(client *clients.DivineShieldClient) fiber.Handler {
 			})
 		}
 
-		c.Locals("user", user)
+		c.Context().SetUserValue("user", user)
 
 		return c.Next()
 	}
