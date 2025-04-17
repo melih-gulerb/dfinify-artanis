@@ -33,7 +33,7 @@ func (h *CollectionHandler) Register(c *fiber.Ctx) error {
 	}
 
 	user := c.Context().UserValue("user").(*clients.User)
-	if validateAuth := h.ValidateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
+	if validateAuth := h.validateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
 		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
 	}
 
@@ -60,8 +60,8 @@ func (h *CollectionHandler) Paginate(c *fiber.Ctx) error {
 	projectId := c.Params("id")
 
 	user := c.Context().UserValue("user").(*clients.User)
-	if validateAuth := h.ValidateAuth(user.Id, projectId); validateAuth != nil {
-		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+	if validateAuth := h.pDb.GetProjectUser(user.Id, projectId); validateAuth == nil {
+		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: "not enough credentials to create a collection"})
 	}
 
 	collections, err := h.db.PaginateCollections(projectId, limit, offset)
@@ -83,6 +83,11 @@ func (h *CollectionHandler) Update(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
 	}
 
+	user := c.Context().UserValue("user").(*clients.User)
+	if validateAuth := h.validateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
+		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+	}
+
 	if err := h.db.UpdateCollection(collectionRequest.Id, collectionRequest.Name, collectionRequest.Description); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to update the collection"})
 	}
@@ -95,6 +100,12 @@ func (h *CollectionHandler) Update(c *fiber.Ctx) error {
 
 func (h *CollectionHandler) Delete(c *fiber.Ctx) error {
 	collectionId := c.Params("id")
+	projectId := c.Query("projectId")
+
+	user := c.Context().UserValue("user").(*clients.User)
+	if validateAuth := h.validateAuth(user.Id, projectId); validateAuth != nil {
+		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+	}
 
 	if err := h.db.DeleteCollection(collectionId); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to delete the collection"})
@@ -113,12 +124,13 @@ func mapPaginateCollectionResponse(collections []models.Collection) []responses.
 			Id:          collection.Id,
 			Name:        collection.Name,
 			Description: collection.Description,
+			CreatedAt:   collection.CreatedAt,
 		})
 	}
 	return collectionsResponse
 }
 
-func (h *CollectionHandler) ValidateAuth(userId, projectId string) error {
+func (h *CollectionHandler) validateAuth(userId, projectId string) error {
 	projectUser := h.pDb.GetProjectUser(userId, projectId)
 	if projectUser == nil || *projectUser == enums.ProjectUser {
 		return errors.New("not enough credentials to create a collection")

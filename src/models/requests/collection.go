@@ -8,6 +8,7 @@ type RegisterCollection struct {
 
 type UpdateCollection struct {
 	Id          string
+	ProjectId   string
 	Name        string
 	Description string
 }

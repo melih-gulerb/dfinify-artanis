@@ -45,7 +45,7 @@ func (repo *CollectionRepository) PaginateCollections(projectId string, limit, o
 	var collections []models.Collection
 	for rows.Next() {
 		var collection models.Collection
-		err := rows.Scan(&collection.Id, &collection.Name, &collection.Description)
+		err := rows.Scan(&collection.Id, &collection.Name, &collection.Description, &collection.CreatedAt)
 		if err != nil {
 			logging.Log(logging.ERROR, err.Error())
 			return nil, err
