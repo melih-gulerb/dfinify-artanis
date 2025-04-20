@@ -1,41 +1,41 @@
 package services
 
 import (
+	"artanis/src/clients"
+	"artanis/src/helpers"
+	helpers2 "artanis/src/models/helpers"
 	"artanis/src/models/requests"
+	models "artanis/src/models/services"
 	"artanis/src/repositories/definitionChangeRepository"
-	"artanis/src/repositories/definitionRepository"
 )
 
 type DefinitionChangeService struct {
-	dcb definitionChangeRepository.DefinitionChangeRepository
-	db  definitionRepository.DefinitionRepository
+	dcb   definitionChangeRepository.DefinitionChangeRepository
+	slack *clients.Slack
 }
 
-func NewDefinitionChangeService(dcb definitionChangeRepository.DefinitionChangeRepository, db definitionRepository.DefinitionRepository) *DefinitionChangeService {
-	return &DefinitionChangeService{dcb: dcb, db: db}
+func NewDefinitionChangeService(dcb *definitionChangeRepository.DefinitionChangeRepository, slack *clients.Slack) *DefinitionChangeService {
+	return &DefinitionChangeService{dcb: dcb, slack: slack}
 }
 
-func (s *DefinitionChangeService) Register(definitionId, userId, newValue string) {
-	definition := s.db.GetDefinition(definitionId)
-
-	if definition == nil {
-		return
-	}
-
+func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChange) {
 	change := requests.RegisterDefinitionChange{
-		DefinitionId: definitionId,
-		UserId:       userId,
-		OldValue:     definition.Value,
-		NewValue:     newValue,
+		DefinitionId: request.DefinitionId,
+		UserId:       request.UserId,
+		OldValue:     request.OldValue,
+		NewValue:     request.NewValue,
 	}
 
 	err := s.dcb.RegisterDefinitionChange(change)
 	if err != nil {
 		return
 	}
+
+	s.SendToSlack("", request)
 }
 
-func SendToSlack() error {
+func (s *DefinitionChangeService) SendToSlack(slackChannelId string, model helpers2.CreateDefinitionChangeRequestSlackModel) error {
+	s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
 	return nil
 }
 

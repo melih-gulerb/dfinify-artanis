@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/models"
 	"artanis/src/models/base"
 	"artanis/src/models/clients"
+	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
@@ -33,7 +33,7 @@ func (h *ProjectHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: "Not enough credentials to create a project"})
 	}
 
-	project := models.Project{
+	project := entities.Project{
 		Id:             uuid.New().String(),
 		Name:           projectRequest.Name,
 		Description:    projectRequest.Description,
@@ -120,7 +120,7 @@ func (h *ProjectHandler) GetDashboardCounts(c *fiber.Ctx) error {
 	})
 }
 
-func mapPaginateResponse(projects []models.Project) []responses.ProjectResponse {
+func mapPaginateResponse(projects []entities.Project) []responses.ProjectResponse {
 	var projectsResponse []responses.ProjectResponse
 	for _, project := range projects {
 		projectsResponse = append(projectsResponse, responses.ProjectResponse{

@@ -4,14 +4,15 @@ import (
 	"artanis/src/configs"
 	"artanis/src/handlers"
 	"artanis/src/repositories/definitionRepository"
-	"database/sql"
+	"artanis/src/repositories/projectUserRepository"
+	"artanis/src/services"
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupDefinitionRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config) {
-	definitionRepo := definitionRepository.NewDefinitionRepository(db)
+func SetupDefinitionRoutes(app *fiber.App, definitionRepository *definitionRepository.DefinitionRepository,
+	projectUserRepo *projectUserRepository.ProjectUserRepository, cfg *configs.Config, definitionChangeService *services.DefinitionChangeService) {
 
-	definitionHandler := handlers.NewDefinitionHandler(definitionRepo, cfg)
+	definitionHandler := handlers.NewDefinitionHandler(definitionRepository, projectUserRepo, definitionChangeService, cfg)
 
 	definitionGroup := app.Group("/definitions")
 

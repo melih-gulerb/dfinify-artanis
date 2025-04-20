@@ -2,7 +2,7 @@ package projectRepository
 
 import (
 	"artanis/src/logging"
-	"artanis/src/models"
+	"artanis/src/models/entities"
 	"artanis/src/models/responses"
 	"database/sql"
 	"time"
@@ -16,7 +16,7 @@ func NewProjectRepository(db *sql.DB) *ProjectRepository {
 	return &ProjectRepository{DB: db}
 }
 
-func (repo *ProjectRepository) RegisterProject(project models.Project) error {
+func (repo *ProjectRepository) RegisterProject(project entities.Project) error {
 	_, err := repo.DB.Exec(RegisterProjectQuery(),
 		sql.Named("Id", project.Id),
 		sql.Named("Name", project.Name),
@@ -29,7 +29,7 @@ func (repo *ProjectRepository) RegisterProject(project models.Project) error {
 	return err
 }
 
-func (repo *ProjectRepository) PaginateProjects(organizationId string, limit, offset int) ([]models.Project, error) {
+func (repo *ProjectRepository) PaginateProjects(organizationId string, limit, offset int) ([]entities.Project, error) {
 	rows, err := repo.DB.Query(PaginateProjectsQuery(),
 		sql.Named("OrganizationId", organizationId),
 		sql.Named("Limit", limit),
@@ -45,9 +45,9 @@ func (repo *ProjectRepository) PaginateProjects(organizationId string, limit, of
 		}
 	}(rows)
 
-	var projects []models.Project
+	var projects []entities.Project
 	for rows.Next() {
-		var project models.Project
+		var project entities.Project
 		var createdAt string
 		err := rows.Scan(&project.Id, &project.Name, &project.Description, &createdAt)
 		project.CreatedAt, err = time.Parse(time.RFC3339, createdAt)

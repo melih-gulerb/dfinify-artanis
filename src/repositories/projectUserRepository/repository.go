@@ -1,7 +1,7 @@
 package projectUserRepository
 
 import (
-	"artanis/src/models"
+	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"database/sql"
 )
@@ -14,7 +14,7 @@ func NewProjectUserRepository(db *sql.DB) *ProjectUserRepository {
 	return &ProjectUserRepository{DB: db}
 }
 
-func (repo *ProjectUserRepository) RegisterProjectUser(user models.ProjectUser) error {
+func (repo *ProjectUserRepository) RegisterProjectUser(user entities.ProjectUser) error {
 	_, err := repo.DB.Exec(RegisterProjectUserQuery())
 	return err
 }

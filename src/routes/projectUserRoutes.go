@@ -3,15 +3,11 @@ package routes
 import (
 	"artanis/src/handlers"
 	"artanis/src/repositories/projectUserRepository"
-	"database/sql"
-
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupProjectUserRoutes(app *fiber.App, db *sql.DB) {
-	projectUserRepo := projectUserRepository.NewProjectUserRepository(db)
-
-	projectUserHandler := handlers.NewProjectUserHandler(*projectUserRepo)
+func SetupProjectUserRoutes(app *fiber.App, db *projectUserRepository.ProjectUserRepository) {
+	projectUserHandler := handlers.NewProjectUserHandler(*db)
 
 	projectUserGroup := app.Group("/project-users")
 

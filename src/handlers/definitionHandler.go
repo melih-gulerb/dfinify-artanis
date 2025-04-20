@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/models"
 	"artanis/src/models/base"
 	"artanis/src/models/clients"
+	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
@@ -33,7 +33,7 @@ func (h *DefinitionHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
 	}
 
-	definition := models.Definition{
+	definition := entities.Definition{
 		Name:  DefinitionRequest.Name,
 		Value: DefinitionRequest.Value,
 	}
@@ -78,8 +78,14 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 		return err
 	}
 
+	definition := h.db.GetDefinition(definitionRequest.Id)
+
+	if definition == nil {
+		return c.Status(fiber.StatusNotFound).JSON(base.Error{Message: "Definition not found"})
+	}
+
 	if role == enums.ProjectUser {
-		h.ds.Register(definitionRequest.Id, user.Id, definitionRequest.Value)
+		h.ds.Register(definitionRequest.Id, user.Id, definition.Value, definitionRequest.Value)
 
 		return c.Status(fiber.StatusOK).JSON(base.Response{
 			Success: true,
@@ -115,7 +121,7 @@ func (h *DefinitionHandler) Delete(c *fiber.Ctx) error {
 	})
 }
 
-func mapPaginateDefinitionResponse(definitions []models.Definition) []responses.DefinitionResponse {
+func mapPaginateDefinitionResponse(definitions []entities.Definition) []responses.DefinitionResponse {
 	var DefinitionsResponse []responses.DefinitionResponse
 	for _, definition := range definitions {
 		DefinitionsResponse = append(DefinitionsResponse, responses.DefinitionResponse{

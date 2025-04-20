@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"artanis/src/models"
 	"artanis/src/models/base"
+	"artanis/src/models/entities"
 	"artanis/src/models/requests"
 	"artanis/src/repositories/projectUserRepository"
 	"github.com/gofiber/fiber/v2"
@@ -23,7 +23,7 @@ func (h *ProjectUserHandler) AssignUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
 	}
 
-	projectUser := models.ProjectUser{
+	projectUser := entities.ProjectUser{
 		Id:        uuid.New().String(),
 		ProjectId: userRequest.ProjectId,
 		UserId:    userRequest.UserId,

@@ -5,15 +5,13 @@ import (
 	"artanis/src/handlers"
 	"artanis/src/repositories/collectionRepository"
 	"artanis/src/repositories/projectUserRepository"
-	"database/sql"
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupCollectionRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config) {
-	collectionRepo := collectionRepository.NewCollectionRepository(db)
-	projectUserRepo := projectUserRepository.NewProjectUserRepository(db)
+func SetupCollectionRoutes(app *fiber.App, collectionRepository *collectionRepository.CollectionRepository,
+	projectUserRepository *projectUserRepository.ProjectUserRepository, cfg *configs.Config) {
 
-	collectionHandler := handlers.NewCollectionHandler(collectionRepo, *projectUserRepo, cfg)
+	collectionHandler := handlers.NewCollectionHandler(collectionRepository, *projectUserRepository, cfg)
 
 	collectionGroup := app.Group("/collections")
 

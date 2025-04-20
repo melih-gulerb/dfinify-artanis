@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/models"
 	"artanis/src/models/base"
 	"artanis/src/models/clients"
+	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
@@ -37,7 +37,7 @@ func (h *CollectionHandler) Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
 	}
 
-	collection := models.Collection{
+	collection := entities.Collection{
 		Id:          uuid.New().String(),
 		Name:        collectionRequest.Name,
 		Description: collectionRequest.Description,
@@ -117,7 +117,7 @@ func (h *CollectionHandler) Delete(c *fiber.Ctx) error {
 	})
 }
 
-func mapPaginateCollectionResponse(collections []models.Collection) []responses.CollectionResponse {
+func mapPaginateCollectionResponse(collections []entities.Collection) []responses.CollectionResponse {
 	var collectionsResponse []responses.CollectionResponse
 	for _, collection := range collections {
 		collectionsResponse = append(collectionsResponse, responses.CollectionResponse{

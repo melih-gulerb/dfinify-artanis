@@ -4,14 +4,11 @@ import (
 	"artanis/src/configs"
 	"artanis/src/handlers"
 	"artanis/src/repositories/projectRepository"
-	"database/sql"
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupProjectRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config) {
-	projectRepo := projectRepository.NewProjectRepository(db)
-
-	projectHandler := handlers.NewProjectHandler(projectRepo, cfg)
+func SetupProjectRoutes(app *fiber.App, db *projectRepository.ProjectRepository, cfg *configs.Config) {
+	projectHandler := handlers.NewProjectHandler(db, cfg)
 
 	projectGroup := app.Group("/projects")
 

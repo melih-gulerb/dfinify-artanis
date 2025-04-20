@@ -14,16 +14,6 @@ type DivineShieldClient struct {
 	HttpClient *http.Client
 }
 
-type AuthResponse struct {
-	Success bool         `json:"success"`
-	Message string       `json:"message"`
-	User    clients.User `json:"data"`
-}
-
-type AuthRequest struct {
-	Token string `json:"token"`
-}
-
 func NewDivineShieldClient(baseURL string) *DivineShieldClient {
 	return &DivineShieldClient{
 		BaseURL: baseURL,
@@ -34,7 +24,7 @@ func NewDivineShieldClient(baseURL string) *DivineShieldClient {
 }
 
 func (c *DivineShieldClient) Authorize(token string) (*clients.User, error) {
-	authReq := AuthRequest{
+	authReq := clients.AuthRequest{
 		Token: token,
 	}
 
@@ -64,7 +54,7 @@ func (c *DivineShieldClient) Authorize(token string) (*clients.User, error) {
 		return nil, fmt.Errorf("divine-shield service returned non-OK status: %d", resp.StatusCode)
 	}
 
-	var authResp AuthResponse
+	var authResp clients.AuthResponse
 	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}

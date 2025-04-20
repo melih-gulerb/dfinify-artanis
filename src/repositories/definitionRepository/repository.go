@@ -2,7 +2,7 @@ package definitionRepository
 
 import (
 	"artanis/src/logging"
-	"artanis/src/models"
+	"artanis/src/models/entities"
 	"database/sql"
 )
 
@@ -14,7 +14,7 @@ func NewDefinitionRepository(db *sql.DB) *DefinitionRepository {
 	return &DefinitionRepository{DB: db}
 }
 
-func (repo *DefinitionRepository) RegisterDefinition(definition models.Definition) error {
+func (repo *DefinitionRepository) RegisterDefinition(definition entities.Definition) error {
 	_, err := repo.DB.Exec(RegisterDefinitionQuery(),
 		sql.Named("Id", definition.Id),
 		sql.Named("Name", definition.Name),
@@ -26,7 +26,7 @@ func (repo *DefinitionRepository) RegisterDefinition(definition models.Definitio
 	return err
 }
 
-func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit, offset int) ([]models.Definition, error) {
+func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit, offset int) ([]entities.Definition, error) {
 	rows, err := repo.DB.Query(PaginateDefinitionsQuery(),
 		sql.Named("CollectionId", collectionId),
 		sql.Named("Limit", limit),
@@ -42,9 +42,9 @@ func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit
 		}
 	}(rows)
 
-	var definitions []models.Definition
+	var definitions []entities.Definition
 	for rows.Next() {
-		var definition models.Definition
+		var definition entities.Definition
 		err := rows.Scan(&definition.Id, &definition.Name, &definition.Value)
 		if err != nil {
 			logging.Log(logging.ERROR, err.Error())
@@ -82,8 +82,8 @@ func (repo *DefinitionRepository) DeleteDefinition(id string) error {
 	return err
 }
 
-func (repo *DefinitionRepository) GetDefinition(id string) *models.Definition {
-	var definition models.Definition
+func (repo *DefinitionRepository) GetDefinition(id string) *entities.Definition {
+	var definition entities.Definition
 
 	err := repo.DB.QueryRow(GetDefinitionByIdQuery(), sql.Named("Id", id)).Scan(&definition.Id, &definition.Value,
 		&definition.Name, &definition.CollectionId)

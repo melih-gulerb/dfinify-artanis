@@ -10,13 +10,16 @@ type User struct {
 	State            enums.UserState        `json:"state"`
 	OrganizationId   string                 `json:"organizationId"`
 	OrganizationRole enums.OrganizationRole `json:"organizationRole"`
+	SlackChannelId   string                 `json:"slackChannelId"`
 	CreatedAt        string                 `json:"createdAt"`
 	UpdatedAt        string                 `json:"updatedAt"`
 	DeletedAt        string                 `json:"deletedAt"`
 }
 
 type AuthResponse struct {
-	User User `json:"user"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	User    User   `json:"data"`
 }
 
 type AuthRequest struct {
