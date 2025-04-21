@@ -1,7 +1,7 @@
 package clients
 
 import (
-	"artanis/src/models/clients"
+	clientmodal "artanis/src/models/clients"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -23,8 +23,8 @@ func NewDivineShieldClient(baseURL string) *DivineShieldClient {
 	}
 }
 
-func (c *DivineShieldClient) Authorize(token string) (*clients.User, error) {
-	authReq := clients.AuthRequest{
+func (c *DivineShieldClient) Authorize(token string) (*clientmodal.User, error) {
+	authReq := clientmodal.AuthRequest{
 		Token: token,
 	}
 
@@ -54,7 +54,7 @@ func (c *DivineShieldClient) Authorize(token string) (*clients.User, error) {
 		return nil, fmt.Errorf("divine-shield service returned non-OK status: %d", resp.StatusCode)
 	}
 
-	var authResp clients.AuthResponse
+	var authResp clientmodal.AuthResponse
 	if err := json.NewDecoder(resp.Body).Decode(&authResp); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}

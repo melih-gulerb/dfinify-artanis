@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/models/base"
-	"artanis/src/models/clients"
+	basemodal "artanis/src/models/base"
+	clientmodal "artanis/src/models/clients"
 	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
@@ -31,7 +31,7 @@ func NewDefinitionHandler(db *definitionRepository.DefinitionRepository, pdb *pr
 func (h *DefinitionHandler) Register(c *fiber.Ctx) error {
 	var DefinitionRequest requests.RegisterDefinition
 	if err := c.BodyParser(&DefinitionRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
 	definition := entities.Definition{
@@ -40,10 +40,10 @@ func (h *DefinitionHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.db.RegisterDefinition(definition); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to register the definition"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the definition"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(base.Response{
+	return c.Status(fiber.StatusCreated).JSON(basemodal.Response{
 		Success: true,
 		Message: "definition successfully created",
 	})
@@ -57,10 +57,10 @@ func (h *DefinitionHandler) Paginate(c *fiber.Ctx) error {
 	definitions, err := h.db.PaginateDefinitions(collectionId, limit, offset)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to paginate the definitions"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to paginate the definitions"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "success",
 		Data:    responses.PaginateDefinitionResponse{DefinitionResponse: mapPaginateDefinitionResponse(definitions), TotalCount: len(definitions)},
@@ -70,10 +70,10 @@ func (h *DefinitionHandler) Paginate(c *fiber.Ctx) error {
 func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 	var definitionRequest requests.UpdateDefinition
 	if err := c.BodyParser(&definitionRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
-	user := c.Context().UserValue("user").(*clients.User)
+	user := c.Context().UserValue("user").(*clientmodal.User)
 	role, err := h.validateAuth(user.Id, definitionRequest.ProjectId)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 
 	definition := h.db.GetDefinition(definitionRequest.Id)
 	if definition == nil {
-		return c.Status(fiber.StatusNotFound).JSON(base.Error{Message: "Definition not found"})
+		return c.Status(fiber.StatusNotFound).JSON(basemodal.Error{Message: "Definition not found"})
 	}
 
 	slackChannelIds := h.pdb.GetProjectAdminsForSlackUser(definitionRequest.ProjectId)
@@ -102,10 +102,10 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 			SlackChannelIds: slackChannelIds,
 		}
 		if err = h.ds.Register(definitionChangeRequest); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to register the definition change"})
+			return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the definition change"})
 		}
 
-		return c.Status(fiber.StatusOK).JSON(base.Response{
+		return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 			Success: true,
 			Message: "Definition update change submitted for approval. You will receive an email when it is approved.",
 			Data: responses.DefinitionResponse{
@@ -117,10 +117,10 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 	}
 
 	if err := h.db.UpdateDefinition(definitionRequest.Id, definitionRequest.Name, definitionRequest.Value); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to update the definition"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the definition"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "definition successfully updated",
 	})
@@ -130,10 +130,10 @@ func (h *DefinitionHandler) Delete(c *fiber.Ctx) error {
 	definitionId := c.Params("id")
 
 	if err := h.db.DeleteDefinition(definitionId); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to delete the definition"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to delete the definition"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "definition successfully deleted",
 	})

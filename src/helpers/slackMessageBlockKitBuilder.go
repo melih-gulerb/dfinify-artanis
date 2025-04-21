@@ -1,12 +1,12 @@
 package helpers
 
 import (
-	"artanis/src/models/helpers"
+	helpermodal "artanis/src/models/helpers"
 	"fmt"
 	"github.com/slack-go/slack"
 )
 
-func CreateDefinitionChangeRequestSlackBlocks(request helpers.CreateDefinitionChangeRequestSlackModel) []slack.Block {
+func CreateDefinitionChangeRequestSlackBlocks(request helpermodal.CreateDefinitionChangeRequestSlackModel) []slack.Block {
 	section1 := slack.NewSectionBlock(
 		&slack.TextBlockObject{
 			Type: slack.MarkdownType,
@@ -61,7 +61,7 @@ func CreateDefinitionChangeRequestSlackBlocks(request helpers.CreateDefinitionCh
 		"approve_deny_action",
 		slack.NewButtonBlockElement(
 			"approve_button",
-			fmt.Sprintf("approve:%s", request.DefinitionChangeId),
+			fmt.Sprintf("approve:%s", request.DefinitionId),
 			&slack.TextBlockObject{
 				Type:  slack.PlainTextType,
 				Text:  "Approve",
@@ -70,7 +70,7 @@ func CreateDefinitionChangeRequestSlackBlocks(request helpers.CreateDefinitionCh
 		).WithStyle(slack.StylePrimary),
 		slack.NewButtonBlockElement(
 			"deny_button",
-			fmt.Sprintf("deny:%s", request.DefinitionChangeId),
+			fmt.Sprintf("deny:%s", request.DefinitionId),
 			&slack.TextBlockObject{
 				Type:  slack.PlainTextType,
 				Text:  "Deny",

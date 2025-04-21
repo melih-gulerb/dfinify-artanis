@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"artanis/src/configs"
-	"artanis/src/models/base"
-	"artanis/src/models/clients"
+	basemodal "artanis/src/models/base"
+	clientmodal "artanis/src/models/clients"
 	"artanis/src/models/entities"
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
@@ -29,12 +29,12 @@ func NewCollectionHandler(db *collectionRepository.CollectionRepository, pDb pro
 func (h *CollectionHandler) Register(c *fiber.Ctx) error {
 	var collectionRequest requests.RegisterCollection
 	if err := c.BodyParser(&collectionRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
-	user := c.Context().UserValue("user").(*clients.User)
+	user := c.Context().UserValue("user").(*clientmodal.User)
 	if validateAuth := h.validateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
-		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: validateAuth.Error()})
 	}
 
 	collection := entities.Collection{
@@ -45,10 +45,10 @@ func (h *CollectionHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.db.RegisterCollection(collection); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to register the collection"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the collection"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(base.Response{
+	return c.Status(fiber.StatusCreated).JSON(basemodal.Response{
 		Success: true,
 		Message: "collection successfully created",
 	})
@@ -59,18 +59,18 @@ func (h *CollectionHandler) Paginate(c *fiber.Ctx) error {
 	offset := c.QueryInt("offset")
 	projectId := c.Params("id")
 
-	user := c.Context().UserValue("user").(*clients.User)
+	user := c.Context().UserValue("user").(*clientmodal.User)
 	if validateAuth := h.pDb.GetProjectUser(user.Id, projectId); validateAuth == nil {
-		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: "not enough credentials to create a collection"})
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: "not enough credentials to create a collection"})
 	}
 
 	collections, err := h.db.PaginateCollections(projectId, limit, offset)
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to register the collection"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the collection"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "success",
 		Data:    responses.PaginateCollectionResponse{CollectionResponse: mapPaginateCollectionResponse(collections), TotalCount: len(collections)},
@@ -80,19 +80,19 @@ func (h *CollectionHandler) Paginate(c *fiber.Ctx) error {
 func (h *CollectionHandler) Update(c *fiber.Ctx) error {
 	var collectionRequest requests.UpdateCollection
 	if err := c.BodyParser(&collectionRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
-	user := c.Context().UserValue("user").(*clients.User)
+	user := c.Context().UserValue("user").(*clientmodal.User)
 	if validateAuth := h.validateAuth(user.Id, collectionRequest.ProjectId); validateAuth != nil {
-		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: validateAuth.Error()})
 	}
 
 	if err := h.db.UpdateCollection(collectionRequest.Id, collectionRequest.Name, collectionRequest.Description); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to update the collection"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the collection"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "collection successfully updated",
 	})
@@ -102,16 +102,16 @@ func (h *CollectionHandler) Delete(c *fiber.Ctx) error {
 	collectionId := c.Params("id")
 	projectId := c.Query("projectId")
 
-	user := c.Context().UserValue("user").(*clients.User)
+	user := c.Context().UserValue("user").(*clientmodal.User)
 	if validateAuth := h.validateAuth(user.Id, projectId); validateAuth != nil {
-		return c.Status(fiber.StatusForbidden).JSON(base.Error{Message: validateAuth.Error()})
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: validateAuth.Error()})
 	}
 
 	if err := h.db.DeleteCollection(collectionId); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to delete the collection"})
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to delete the collection"})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "collection successfully deleted",
 	})

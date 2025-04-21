@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"artanis/src/logging"
-	"artanis/src/models/base"
+	basemodal "artanis/src/models/base"
 	"encoding/json"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -20,7 +20,7 @@ func PanicRecoveryMiddleware() fiber.Handler {
 				logging.Log(logging.ERROR, errMsg+"\n"+string(stackTrace))
 
 				c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-				_ = c.Status(fiber.StatusInternalServerError).JSON(base.Response{
+				_ = c.Status(fiber.StatusInternalServerError).JSON(basemodal.Response{
 					Success: false,
 					Message: "Internal Server Error: The server encountered an unexpected condition",
 					Data:    nil,
@@ -64,7 +64,7 @@ func CustomErrorHandler(c *fiber.Ctx, err error) error {
 
 	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 
-	return c.Status(code).JSON(base.Response{
+	return c.Status(code).JSON(basemodal.Response{
 		Success: false,
 		Message: message,
 		Data:    nil,

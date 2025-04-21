@@ -1,4 +1,4 @@
-package clients
+package client_modal
 
 import "artanis/src/models/enums"
 

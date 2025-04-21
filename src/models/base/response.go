@@ -1,4 +1,4 @@
-package base
+package base_modal
 
 type Response struct {
 	Success bool        `json:"success"`

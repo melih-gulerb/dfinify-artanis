@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"artanis/src/models/base"
+	basemodal "artanis/src/models/base"
 	"artanis/src/models/entities"
 	"artanis/src/models/requests"
 	"artanis/src/repositories/projectUserRepository"
@@ -20,7 +20,7 @@ func NewProjectUserHandler(repository projectUserRepository.ProjectUserRepositor
 func (h *ProjectUserHandler) AssignUser(c *fiber.Ctx) error {
 	var userRequest requests.AssignUser
 	if err := c.BodyParser(&userRequest); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
 	projectUser := entities.ProjectUser{
@@ -31,10 +31,10 @@ func (h *ProjectUserHandler) AssignUser(c *fiber.Ctx) error {
 	}
 
 	if err := h.repository.RegisterProjectUser(projectUser); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(base.Error{Message: err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(base.Response{
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
 		Message: "User successfully assigned",
 	})
