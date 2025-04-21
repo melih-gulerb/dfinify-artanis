@@ -13,3 +13,10 @@ var GetProjectUserQuery = func() string {
 	WHERE ProjectId = @ProjectId AND UserId = @UserId AND DeletedAt IS NULL
 `
 }
+
+var GetProjectAdminsForSlackUserQuery = func() string {
+	return `
+	SELECT SlackChannelId FROM dbo.ProjectUsers
+	WHERE ProjectId = @ProjectId AND Role = 1 AND DeletedAt IS NULL
+`
+}

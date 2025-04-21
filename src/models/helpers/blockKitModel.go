@@ -1,5 +1,5 @@
-package helpers
+package models
 
 type CreateDefinitionChangeRequestSlackModel struct {
-	ProjectName, CollectionName, DefinitionChangeId, DefinitionName, OldValue, NewValue, UserName, UserMail string
+	ProjectName, CollectionName, DefinitionId, DefinitionName, OldValue, NewValue, UserName, UserMail string
 }

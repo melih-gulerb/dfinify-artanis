@@ -8,8 +8,10 @@ type RegisterDefinition struct {
 }
 
 type UpdateDefinition struct {
-	Id        string
-	Name      string
-	Value     string
-	ProjectId string
+	Id             string
+	Name           string
+	Value          string
+	ProjectId      string
+	ProjectName    string
+	CollectionName string
 }

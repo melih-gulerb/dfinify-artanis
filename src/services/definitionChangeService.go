@@ -3,14 +3,15 @@ package services
 import (
 	"artanis/src/clients"
 	"artanis/src/helpers"
-	helpers2 "artanis/src/models/helpers"
+	helperModel "artanis/src/models/helpers"
 	"artanis/src/models/requests"
 	models "artanis/src/models/services"
 	"artanis/src/repositories/definitionChangeRepository"
+	"fmt"
 )
 
 type DefinitionChangeService struct {
-	dcb   definitionChangeRepository.DefinitionChangeRepository
+	dcb   *definitionChangeRepository.DefinitionChangeRepository
 	slack *clients.Slack
 }
 
@@ -18,7 +19,7 @@ func NewDefinitionChangeService(dcb *definitionChangeRepository.DefinitionChange
 	return &DefinitionChangeService{dcb: dcb, slack: slack}
 }
 
-func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChange) {
+func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChange) error {
 	change := requests.RegisterDefinitionChange{
 		DefinitionId: request.DefinitionId,
 		UserId:       request.UserId,
@@ -28,14 +29,36 @@ func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChan
 
 	err := s.dcb.RegisterDefinitionChange(change)
 	if err != nil {
-		return
+		return err
 	}
 
-	s.SendToSlack("", request)
+	blockKit := helperModel.CreateDefinitionChangeRequestSlackModel{
+		ProjectName:    request.ProjectName,
+		CollectionName: request.CollectionName,
+		DefinitionId:   request.DefinitionId,
+		DefinitionName: request.DefinitionName,
+		OldValue:       request.OldValue,
+		NewValue:       request.NewValue,
+		UserName:       request.UserName,
+		UserMail:       request.UserMail,
+	}
+
+	for _, id := range request.SlackChannelIds {
+		err := s.SendToSlack(id, blockKit)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	return nil
 }
 
-func (s *DefinitionChangeService) SendToSlack(slackChannelId string, model helpers2.CreateDefinitionChangeRequestSlackModel) error {
-	s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
+func (s *DefinitionChangeService) SendToSlack(slackChannelId string, model helperModel.CreateDefinitionChangeRequestSlackModel) error {
+	err := s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

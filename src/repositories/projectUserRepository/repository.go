@@ -30,3 +30,27 @@ func (repo *ProjectUserRepository) GetProjectUser(userId, projectId string) *enu
 
 	return &role
 }
+
+func (repo *ProjectUserRepository) GetProjectAdminsForSlackUser(projectId string) []string {
+	var slackChannelIds []string
+
+	rows, err := repo.DB.Query(GetProjectAdminsForSlackUserQuery(), sql.Named("ProjectId", projectId))
+	if err != nil {
+		return nil
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var slackChannelId string
+		if err := rows.Scan(&slackChannelId); err != nil {
+			continue
+		}
+		slackChannelIds = append(slackChannelIds, slackChannelId)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil
+	}
+
+	return slackChannelIds
+}

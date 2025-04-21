@@ -8,6 +8,7 @@ import (
 	"artanis/src/models/enums"
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
+	models "artanis/src/models/services"
 	"artanis/src/repositories/definitionRepository"
 	"artanis/src/repositories/projectUserRepository"
 	"artanis/src/services"
@@ -79,13 +80,30 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 	}
 
 	definition := h.db.GetDefinition(definitionRequest.Id)
-
 	if definition == nil {
 		return c.Status(fiber.StatusNotFound).JSON(base.Error{Message: "Definition not found"})
 	}
 
+	slackChannelIds := h.pdb.GetProjectAdminsForSlackUser(definitionRequest.ProjectId)
+
 	if role == enums.ProjectUser {
-		h.ds.Register(definitionRequest.Id, user.Id, definition.Value, definitionRequest.Value)
+
+		definitionChangeRequest := models.RegisterDefinitionChange{
+			DefinitionId:    definition.Id,
+			ProjectId:       definitionRequest.ProjectId,
+			OldValue:        definition.Value,
+			NewValue:        definitionRequest.Value,
+			ProjectName:     definitionRequest.ProjectName,
+			CollectionName:  definitionRequest.CollectionName,
+			DefinitionName:  definitionRequest.Name,
+			UserName:        user.Name,
+			UserMail:        user.Email,
+			UserId:          user.Id,
+			SlackChannelIds: slackChannelIds,
+		}
+		if err = h.ds.Register(definitionChangeRequest); err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(base.Error{Message: "Failed to register the definition change"})
+		}
 
 		return c.Status(fiber.StatusOK).JSON(base.Response{
 			Success: true,
