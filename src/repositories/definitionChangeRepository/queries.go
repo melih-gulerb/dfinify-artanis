@@ -2,7 +2,7 @@ package definitionChangeRepository
 
 var RegisterDefinitionChange = func() string {
 	return `
-INSERT INTO DefinitionChanges (Id, UserId, DefinitionID, OldValue, NewValue) VALUES (@Id, @UserId,
+INSERT INTO DefinitionChanges (Id, UserId, DefinitionId, OldValue, NewValue) VALUES (@Id, @UserId,
 @DefinitionId, @OldValue, @NewValue)
 `
 }

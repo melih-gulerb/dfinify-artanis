@@ -1,17 +1,17 @@
 package requests
 
 type RegisterDefinition struct {
-	Name         string
-	Value        string
-	CollectionId string
-	ProjectId    string
+	Name         string `json:"name"`
+	Value        string `json:"value"`
+	CollectionId string `json:"collectionId"`
+	ProjectId    string `json:"projectId"`
 }
 
 type UpdateDefinition struct {
 	Id             string
-	Name           string
-	Value          string
-	ProjectId      string
-	ProjectName    string
-	CollectionName string
+	Name           string `json:"name"`
+	Value          string `json:"value"`
+	ProjectId      string `json:"projectId"`
+	ProjectName    string `json:"projectName"`
+	CollectionName string `json:"collectionName"`
 }

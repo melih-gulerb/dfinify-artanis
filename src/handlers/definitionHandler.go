@@ -14,6 +14,7 @@ import (
 	"artanis/src/services"
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type DefinitionHandler struct {
@@ -29,14 +30,16 @@ func NewDefinitionHandler(db *definitionRepository.DefinitionRepository, pdb *pr
 }
 
 func (h *DefinitionHandler) Register(c *fiber.Ctx) error {
-	var DefinitionRequest requests.RegisterDefinition
-	if err := c.BodyParser(&DefinitionRequest); err != nil {
+	var definitionRequest requests.RegisterDefinition
+	if err := c.BodyParser(&definitionRequest); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
 	definition := entities.Definition{
-		Name:  DefinitionRequest.Name,
-		Value: DefinitionRequest.Value,
+		Id:           uuid.New().String(),
+		CollectionId: definitionRequest.CollectionId,
+		Name:         definitionRequest.Name,
+		Value:        definitionRequest.Value,
 	}
 
 	if err := h.db.RegisterDefinition(definition); err != nil {
@@ -140,15 +143,16 @@ func (h *DefinitionHandler) Delete(c *fiber.Ctx) error {
 }
 
 func mapPaginateDefinitionResponse(definitions []entities.Definition) []responses.DefinitionResponse {
-	var DefinitionsResponse []responses.DefinitionResponse
+	var definitionsResponse []responses.DefinitionResponse
 	for _, definition := range definitions {
-		DefinitionsResponse = append(DefinitionsResponse, responses.DefinitionResponse{
-			Id:    definition.Id,
-			Name:  definition.Name,
-			Value: definition.Value,
+		definitionsResponse = append(definitionsResponse, responses.DefinitionResponse{
+			Id:        definition.Id,
+			Name:      definition.Name,
+			Value:     definition.Value,
+			CreatedAt: definition.CreatedAt,
 		})
 	}
-	return DefinitionsResponse
+	return definitionsResponse
 }
 
 func (h *DefinitionHandler) validateAuth(userId, projectId string) (enums.ProjectRole, error) {

@@ -18,7 +18,8 @@ func (repo *DefinitionRepository) RegisterDefinition(definition entities.Definit
 	_, err := repo.DB.Exec(RegisterDefinitionQuery(),
 		sql.Named("Id", definition.Id),
 		sql.Named("Name", definition.Name),
-		sql.Named("Value", definition.Value))
+		sql.Named("Value", definition.Value),
+		sql.Named("CollectionId", definition.CollectionId))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
 	}
@@ -45,7 +46,7 @@ func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit
 	var definitions []entities.Definition
 	for rows.Next() {
 		var definition entities.Definition
-		err := rows.Scan(&definition.Id, &definition.Name, &definition.Value)
+		err := rows.Scan(&definition.Id, &definition.Name, &definition.Value, &definition.CreatedAt)
 		if err != nil {
 			logging.Log(logging.ERROR, err.Error())
 			return nil, err
@@ -86,7 +87,7 @@ func (repo *DefinitionRepository) GetDefinition(id string) *entities.Definition 
 	var definition entities.Definition
 
 	err := repo.DB.QueryRow(GetDefinitionByIdQuery(), sql.Named("Id", id)).Scan(&definition.Id, &definition.Value,
-		&definition.Name, &definition.CollectionId)
+		&definition.Name, &definition.CollectionId, &definition.CreatedAt)
 
 	if err != nil {
 		return nil

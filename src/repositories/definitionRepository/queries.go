@@ -2,18 +2,17 @@ package definitionRepository
 
 var RegisterDefinitionQuery = func() string {
 	return `
-INSERT INTO dbo.Definitions (Id, Name, Value, Description) 
-VALUES (@Id, @Name, @Value, @Description)
+INSERT INTO dbo.Definitions (Id, Name, Value, CollectionId) 
+VALUES (@Id, @Name, @Value, @CollectionId)
 `
 }
 
 var PaginateDefinitionsQuery = func() string {
 	return `
-SELECT Id, Name, Description 
+SELECT Id, Name, Value, CreatedAt
 FROM dbo.Definitions 
 WHERE CollectionId = @CollectionId 
   AND DeletedAt IS NULL
-GROUP BY CollectionId, Id, Name, Description 
 ORDER BY CreatedAt DESC 
 OFFSET @Offset ROWS 
 FETCH NEXT @Limit ROWS ONLY

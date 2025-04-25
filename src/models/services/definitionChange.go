@@ -1,4 +1,4 @@
-package models
+package service_mdoal
 
 type RegisterDefinitionChange struct {
 	DefinitionId    string
