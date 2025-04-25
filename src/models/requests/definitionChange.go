@@ -10,6 +10,6 @@ type RegisterDefinitionChange struct {
 }
 
 type UpdateDefinitionChange struct {
-	DefinitionId string
-	State        enums.DefinitionChangeState
+	DefinitionId string                      `json:"definitionId"`
+	State        enums.DefinitionChangeState `json:"state"`
 }

@@ -3,6 +3,7 @@ package definitionRepository
 import (
 	"artanis/src/logging"
 	"artanis/src/models/entities"
+	servicemodal "artanis/src/models/services"
 	"database/sql"
 )
 
@@ -62,10 +63,20 @@ func (repo *DefinitionRepository) PaginateDefinitions(collectionId string, limit
 	return definitions, nil
 }
 
-func (repo *DefinitionRepository) UpdateDefinition(id string, name string, value string) error {
-	_, err := repo.DB.Exec(UpdateDefinitionQuery(),
+func (repo *DefinitionRepository) UpdateDefinitionName(id string, name string) error {
+	_, err := repo.DB.Exec(UpdateDefinitionNameQuery(),
 		sql.Named("Id", id),
-		sql.Named("Name", name),
+		sql.Named("Name", name))
+	if err != nil {
+		logging.Log(logging.ERROR, err.Error())
+	}
+
+	return err
+}
+
+func (repo *DefinitionRepository) UpdateDefinitionValue(id string, value string) error {
+	_, err := repo.DB.Exec(UpdateDefinitionValueQuery(),
+		sql.Named("Id", id),
 		sql.Named("Value", value))
 	if err != nil {
 		logging.Log(logging.ERROR, err.Error())
@@ -94,4 +105,16 @@ func (repo *DefinitionRepository) GetDefinition(id string) *entities.Definition 
 	}
 
 	return &definition
+}
+
+func (repo *DefinitionRepository) GetDefinitionDetail(definitionId string) *servicemodal.DefinitionDetail {
+	var definitionDetail servicemodal.DefinitionDetail
+	err := repo.DB.QueryRow(GetDefinitionDetail(), sql.Named("Id", definitionId)).Scan(&definitionDetail.CollectionName,
+		&definitionDetail.DefinitionName, &definitionDetail.ProjectId, &definitionDetail.ProjectName, &definitionDetail.OldValue)
+
+	if err != nil {
+		return nil
+	}
+
+	return &definitionDetail
 }

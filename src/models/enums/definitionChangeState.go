@@ -5,7 +5,7 @@ type DefinitionChangeState int
 const (
 	Submitted DefinitionChangeState = iota
 	ChangeApproved
-	Rejected
+	ChangeRejected
 )
 
 func (r DefinitionChangeState) String() string {
@@ -14,8 +14,8 @@ func (r DefinitionChangeState) String() string {
 		return "Submitted"
 	case ChangeApproved:
 		return "Approved"
-	case Rejected:
-		return "Rejected"
+	case ChangeRejected:
+		return "ChangeRejected"
 	default:
 		return "Unknown"
 	}

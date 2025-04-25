@@ -39,12 +39,11 @@ func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChan
 		DefinitionName: request.DefinitionName,
 		OldValue:       request.OldValue,
 		NewValue:       request.NewValue,
-		UserName:       request.UserName,
 		UserMail:       request.UserMail,
 	}
 
 	for _, id := range request.SlackChannelIds {
-		err := s.SendToSlack(id, blockKit)
+		err := s.sendToSlack(id, blockKit)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -53,7 +52,7 @@ func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChan
 	return nil
 }
 
-func (s *DefinitionChangeService) SendToSlack(slackChannelId string, model helperModel.CreateDefinitionChangeRequestSlackModel) error {
+func (s *DefinitionChangeService) sendToSlack(slackChannelId string, model helperModel.CreateDefinitionChangeRequestSlackModel) error {
 	err := s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
 	if err != nil {
 		return err

@@ -18,6 +18,7 @@ func SetupDefinitionRoutes(app *fiber.App, definitionRepository *definitionRepos
 
 	definitionGroup.Post("/", definitionHandler.Register)
 	definitionGroup.Get("/:id", definitionHandler.Paginate)
-	definitionGroup.Put("/", definitionHandler.Update)
+	definitionGroup.Put("/name", definitionHandler.UpdateName)
+	definitionGroup.Put("/value", definitionHandler.UpdateValue)
 	definitionGroup.Delete("/:id", definitionHandler.Delete)
 }

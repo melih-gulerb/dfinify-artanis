@@ -19,10 +19,17 @@ FETCH NEXT @Limit ROWS ONLY
 `
 }
 
-var UpdateDefinitionQuery = func() string {
+var UpdateDefinitionNameQuery = func() string {
 	return `
 UPDATE dbo.Definitions 
-SET Name = @Name, Value = @Value
+SET Name = @Name
+WHERE Id = @Id
+`
+}
+var UpdateDefinitionValueQuery = func() string {
+	return `
+UPDATE dbo.Definitions 
+SET Value = @Value
 WHERE Id = @Id
 `
 }
@@ -41,5 +48,19 @@ SELECT Id, Name, Value, CollectionId, CreatedAt
 FROM dbo.Definitions 
 WHERE Id = @Id 
   AND DeletedAt IS NULL
+`
+}
+
+var GetDefinitionDetail = func() string {
+	return `
+SELECT c.Name AS CollectionName,
+       d.Name As DefinitionName,
+       p.Id AS ProjectId, p.Name AS ProjectName,
+       d.Value As OldValue
+FROM dbo.Definitions d
+JOIN dbo.Collections c ON d.CollectionId = c.Id AND c.DeletedAt IS NULL
+JOIN dbo.Projects p ON c.ProjectId = p.Id AND p.DeletedAt IS NULL
+WHERE d.Id = @Id 
+  AND d.DeletedAt IS NULL
 `
 }

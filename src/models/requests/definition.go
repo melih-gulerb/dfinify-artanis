@@ -15,3 +15,14 @@ type UpdateDefinition struct {
 	ProjectName    string `json:"projectName"`
 	CollectionName string `json:"collectionName"`
 }
+type UpdateDefinitionName struct {
+	Id        string `json:"id"`
+	ProjectId string `json:"projectId"`
+	Name      string `json:"name"`
+	Value     string `json:"value"`
+}
+
+type UpdateDefinitionValue struct {
+	Id    string `json:"id"`
+	Value string `json:"value"`
+}

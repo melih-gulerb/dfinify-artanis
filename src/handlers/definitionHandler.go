@@ -12,7 +12,6 @@ import (
 	"artanis/src/repositories/definitionRepository"
 	"artanis/src/repositories/projectUserRepository"
 	"artanis/src/services"
-	"errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -70,16 +69,17 @@ func (h *DefinitionHandler) Paginate(c *fiber.Ctx) error {
 	})
 }
 
-func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
-	var definitionRequest requests.UpdateDefinition
+func (h *DefinitionHandler) UpdateName(c *fiber.Ctx) error {
+	var definitionRequest requests.UpdateDefinitionName
 	if err := c.BodyParser(&definitionRequest); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
 	}
 
 	user := c.Context().UserValue("user").(*clientmodal.User)
-	role, err := h.validateAuth(user.Id, definitionRequest.ProjectId)
-	if err != nil {
-		return err
+
+	projectUser := h.pdb.GetProjectUser(user.Id, definitionRequest.ProjectId)
+	if projectUser == nil || *projectUser == enums.ProjectUser {
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: "not enough credentials to create a definition"})
 	}
 
 	definition := h.db.GetDefinition(definitionRequest.Id)
@@ -87,45 +87,52 @@ func (h *DefinitionHandler) Update(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(basemodal.Error{Message: "Definition not found"})
 	}
 
-	slackChannelIds := h.pdb.GetProjectAdminsForSlackUser(definitionRequest.ProjectId)
-
-	if role == enums.ProjectUser {
-
-		definitionChangeRequest := models.RegisterDefinitionChange{
-			DefinitionId:    definition.Id,
-			ProjectId:       definitionRequest.ProjectId,
-			OldValue:        definition.Value,
-			NewValue:        definitionRequest.Value,
-			ProjectName:     definitionRequest.ProjectName,
-			CollectionName:  definitionRequest.CollectionName,
-			DefinitionName:  definitionRequest.Name,
-			UserName:        user.Name,
-			UserMail:        user.Email,
-			UserId:          user.Id,
-			SlackChannelIds: slackChannelIds,
-		}
-		if err = h.ds.Register(definitionChangeRequest); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the definition change"})
-		}
-
-		return c.Status(fiber.StatusOK).JSON(basemodal.Response{
-			Success: true,
-			Message: "Definition update change submitted for approval. You will receive an email when it is approved.",
-			Data: responses.DefinitionResponse{
-				Id:    definitionRequest.Id,
-				Name:  definitionRequest.Name,
-				Value: definitionRequest.Value,
-			},
-		})
-	}
-
-	if err := h.db.UpdateDefinition(definitionRequest.Id, definitionRequest.Name, definitionRequest.Value); err != nil {
+	if err := h.db.UpdateDefinitionName(definitionRequest.Id, definitionRequest.Name); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the definition"})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,
-		Message: "definition successfully updated",
+		Message: "definition name successfully updated",
+	})
+}
+
+func (h *DefinitionHandler) UpdateValue(c *fiber.Ctx) error {
+	var definitionRequest requests.UpdateDefinitionValue
+	if err := c.BodyParser(&definitionRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
+	}
+
+	definition := h.db.GetDefinitionDetail(definitionRequest.Id)
+	if definition == nil {
+		return c.Status(fiber.StatusNotFound).JSON(basemodal.Error{Message: "Definition not found"})
+	}
+
+	user := c.Context().UserValue("user").(*clientmodal.User)
+
+	projectUser := h.pdb.GetProjectUser(user.Id, definition.ProjectId)
+	if projectUser == nil {
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: "not enough credentials to create a definition"})
+	}
+
+	if *projectUser == enums.ProjectUser {
+		err := h.registerDefinitionChange(definition, definitionRequest.Value, user.Email, user.Id)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to register the definition change"})
+		}
+		return c.Status(fiber.StatusOK).JSON(basemodal.Response{
+			Success: true,
+			Message: "definition value successfully submitted for approval",
+		})
+	}
+
+	if err := h.db.UpdateDefinitionValue(definitionRequest.Id, definitionRequest.Value); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the definition"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
+		Success: true,
+		Message: "definition name successfully updated",
 	})
 }
 
@@ -155,11 +162,25 @@ func mapPaginateDefinitionResponse(definitions []entities.Definition) []response
 	return definitionsResponse
 }
 
-func (h *DefinitionHandler) validateAuth(userId, projectId string) (enums.ProjectRole, error) {
-	projectUser := h.pdb.GetProjectUser(userId, projectId)
-	if projectUser == nil {
-		return 0, errors.New("not enough credentials to create a collection")
+func (h *DefinitionHandler) registerDefinitionChange(definitionDetail *models.DefinitionDetail, newValue, userMail, userId string) error {
+	slackChannelIds := h.pdb.GetProjectAdminsForSlackUser(definitionDetail.ProjectId)
+
+	request := models.RegisterDefinitionChange{
+		DefinitionId:    definitionDetail.Id,
+		OldValue:        definitionDetail.OldValue,
+		NewValue:        newValue,
+		ProjectName:     definitionDetail.ProjectName,
+		CollectionName:  definitionDetail.CollectionName,
+		DefinitionName:  definitionDetail.Name,
+		UserMail:        userMail,
+		UserId:          userId,
+		SlackChannelIds: slackChannelIds,
 	}
 
-	return *projectUser, nil
+	err := h.ds.Register(request)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
