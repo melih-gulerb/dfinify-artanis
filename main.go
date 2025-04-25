@@ -14,10 +14,7 @@ func main() {
 
 	repositories := configs.InitDbContext(db)
 
-	divineShield := clients.NewDivineShieldClient(cfg.DivineShieldBaseUrl)
-
 	app := configs.InitFiber()
-	app.Use(middlewares.AuthorizationMiddleware(divineShield))
 	app.Use(middlewares.PanicRecoveryMiddleware())
 
 	slack := clients.NewSlackClient(cfg.SlackToken)
@@ -25,7 +22,7 @@ func main() {
 
 	routes.SetupProjectRoutes(app, repositories.ProjectRepository, cfg)
 	routes.SetupCollectionRoutes(app, repositories.CollectionRepository, repositories.ProjectUserRepository, cfg)
-	routes.SetupProjectUserRoutes(app, repositories.ProjectUserRepository)
+	routes.SetupProjectUserRoutes(app, repositories.ProjectUserRepository, cfg)
 	routes.SetupDefinitionRoutes(app, repositories.DefinitionRepository, repositories.ProjectUserRepository, cfg, definitionChangeService)
 	routes.SetupDefinitionChangeRoutes(app, db, cfg)
 

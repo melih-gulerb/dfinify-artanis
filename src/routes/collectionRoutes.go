@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"artanis/src/clients"
 	"artanis/src/configs"
 	"artanis/src/handlers"
+	"artanis/src/middlewares"
 	"artanis/src/repositories/collectionRepository"
 	"artanis/src/repositories/projectUserRepository"
 	"github.com/gofiber/fiber/v2"
@@ -14,6 +16,9 @@ func SetupCollectionRoutes(app *fiber.App, collectionRepository *collectionRepos
 	collectionHandler := handlers.NewCollectionHandler(collectionRepository, *projectUserRepository, cfg)
 
 	collectionGroup := app.Group("/collections")
+
+	divineShield := clients.NewDivineShieldClient(cfg.DivineShieldBaseUrl)
+	collectionGroup.Use(middlewares.AuthorizationMiddleware(divineShield))
 
 	collectionGroup.Post("/", collectionHandler.Register)
 	collectionGroup.Get("/:id", collectionHandler.Paginate)

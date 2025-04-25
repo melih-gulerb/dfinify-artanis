@@ -29,7 +29,7 @@ WHERE Id = @Id
 var UpdateDefinitionValueQuery = func() string {
 	return `
 UPDATE dbo.Definitions 
-SET Value = @Value
+SET Value = @Value, ModifiedAt = GETDATE()
 WHERE Id = @Id
 `
 }
