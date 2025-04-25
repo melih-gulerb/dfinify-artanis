@@ -46,6 +46,7 @@ func (h *DefinitionChangeHandler) Update(c *fiber.Ctx) error {
 		Message: "definition successfully updated",
 	})
 }
+
 func (h *DefinitionChangeHandler) Paginate(c *fiber.Ctx) error {
 	var definitionRequest requests.UpdateDefinitionChange
 	if err := c.BodyParser(&definitionRequest); err != nil {

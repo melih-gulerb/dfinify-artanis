@@ -15,7 +15,6 @@ func SetupDefinitionChangeRoutes(app *fiber.App, db *sql.DB, cfg *configs.Config
 
 	definitionChangeGroup := app.Group("/definitionChanges")
 
-	definitionChangeGroup.Post("/definitionChange", definitionChangeHandler.Register)
-	definitionChangeGroup.Get("/definitionChange", definitionChangeHandler.Paginate)
-	definitionChangeGroup.Put("/definitionChange", definitionChangeHandler.Update)
+	definitionChangeGroup.Get("/", definitionChangeHandler.Paginate)
+	definitionChangeGroup.Put("/", definitionChangeHandler.Update)
 }

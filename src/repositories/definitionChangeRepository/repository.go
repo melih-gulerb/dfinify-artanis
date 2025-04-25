@@ -24,3 +24,13 @@ func (repo *DefinitionChangeRepository) UpdateDefinitionChangeState(change reque
 	_, err := repo.DB.Exec(UpdateDefinitionChangeState(), sql.Named("DefinitionId", change.DefinitionId), sql.Named("State", change.State))
 	return err
 }
+
+func (repo *DefinitionChangeRepository) GetDefinitionChange(definitionId string) (string, error) {
+	var value string
+	err := repo.DB.QueryRow(GetDefinitionChangeState(), sql.Named("DefinitionId", definitionId)).Scan(&value)
+	if err != nil {
+		return "", err
+	}
+
+	return value, err
+}

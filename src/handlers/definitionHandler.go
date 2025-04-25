@@ -136,6 +136,35 @@ func (h *DefinitionHandler) UpdateValue(c *fiber.Ctx) error {
 	})
 }
 
+func (h *DefinitionHandler) UpdateState(c *fiber.Ctx) error {
+	var definitionRequest requests.UpdateDefinitionChange
+	if err := c.BodyParser(&definitionRequest); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(basemodal.Error{Message: err.Error()})
+	}
+
+	err := h.ds.UpdateState(definitionRequest.DefinitionId, definitionRequest.State)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the definition state"})
+	}
+
+	value, err := h.ds.GetDefinitionChange(definitionRequest.DefinitionId)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to get the definition change"})
+	}
+
+	if definitionRequest.State == enums.ChangeApproved {
+		err := h.db.UpdateDefinitionValue(definitionRequest.DefinitionId, value)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to update the definition"})
+		}
+	}
+
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
+		Success: true,
+		Message: "definition value successfully updated",
+	})
+}
+
 func (h *DefinitionHandler) Delete(c *fiber.Ctx) error {
 	definitionId := c.Params("id")
 

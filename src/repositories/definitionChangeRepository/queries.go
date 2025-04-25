@@ -14,3 +14,10 @@ SET State = @State
 WHERE DefinitionId = @DefinitionId
 `
 }
+
+var GetDefinitionChangeState = func() string {
+	return `
+SELECT NewValue FROM DefinitionChanges 
+WHERE DefinitionId = @DefinitionId
+`
+}

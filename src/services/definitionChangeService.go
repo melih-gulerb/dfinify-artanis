@@ -3,6 +3,7 @@ package services
 import (
 	"artanis/src/clients"
 	"artanis/src/helpers"
+	"artanis/src/models/enums"
 	helperModel "artanis/src/models/helpers"
 	"artanis/src/models/requests"
 	models "artanis/src/models/services"
@@ -52,8 +53,12 @@ func (s *DefinitionChangeService) Register(request models.RegisterDefinitionChan
 	return nil
 }
 
-func (s *DefinitionChangeService) sendToSlack(slackChannelId string, model helperModel.CreateDefinitionChangeRequestSlackModel) error {
-	err := s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
+func (s *DefinitionChangeService) UpdateState(definitionId string, state enums.DefinitionChangeState) error {
+	err := s.dcb.UpdateDefinitionChangeState(requests.UpdateDefinitionChange{
+		DefinitionId: definitionId,
+		State:        state,
+	})
+
 	if err != nil {
 		return err
 	}
@@ -61,6 +66,21 @@ func (s *DefinitionChangeService) sendToSlack(slackChannelId string, model helpe
 	return nil
 }
 
-func SendToMail() error {
+func (s *DefinitionChangeService) GetDefinitionChange(definitionId string) (string, error) {
+	value, err := s.dcb.GetDefinitionChange(definitionId)
+
+	if err != nil {
+		return "", err
+	}
+
+	return value, nil
+}
+
+func (s *DefinitionChangeService) sendToSlack(slackChannelId string, model helperModel.CreateDefinitionChangeRequestSlackModel) error {
+	err := s.slack.SendBlockKitMessage(slackChannelId, helpers.CreateDefinitionChangeRequestSlackBlocks(model))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
