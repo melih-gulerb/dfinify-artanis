@@ -1,7 +1,13 @@
 package requests
 
-type AssignUser struct {
+import "artanis/src/models/enums"
+
+type Register struct {
 	UserId    string
 	ProjectId string
-	RoleId    string
+	Role      enums.ProjectRole
+}
+
+type UpdateRole struct {
+	Role enums.ProjectRole
 }

@@ -1,12 +1,15 @@
 package entities
 
-import "time"
+import (
+	"artanis/src/models/enums"
+	"time"
+)
 
 type ProjectUser struct {
 	Id             string
 	ProjectId      string
 	UserId         string
-	RoleId         string
+	Role           enums.ProjectRole
 	SlackChannelId string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time

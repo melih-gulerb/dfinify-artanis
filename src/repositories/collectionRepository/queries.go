@@ -13,7 +13,6 @@ SELECT Id, Name, Description, CreatedAt
 FROM dbo.Collections 
 WHERE ProjectId = @ProjectId 
   AND DeletedAt IS NULL
-GROUP BY ProjectId, Id, Name, Description, CreatedAt
 ORDER BY CreatedAt DESC 
 OFFSET @Offset ROWS 
 FETCH NEXT @Limit ROWS ONLY

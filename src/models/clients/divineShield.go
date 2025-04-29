@@ -16,6 +16,17 @@ type User struct {
 	DeletedAt        string                 `json:"deletedAt"`
 }
 
+type UserInformation struct {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+type UserInformationResponse struct {
+	Success         bool              `json:"success"`
+	Message         string            `json:"message"`
+	UserInformation []UserInformation `json:"data"`
+}
+
 type AuthResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
@@ -24,4 +35,7 @@ type AuthResponse struct {
 
 type AuthRequest struct {
 	Token string `json:"token"`
+}
+type UserInformationRequest struct {
+	UserIds []string `json:"userIds"`
 }
