@@ -1,10 +1,13 @@
 package requests
 
+import "artanis/src/models/enums"
+
 type RegisterDefinition struct {
-	Name         string `json:"name"`
-	Value        string `json:"value"`
-	CollectionId string `json:"collectionId"`
-	ProjectId    string `json:"projectId"`
+	Name         string               `json:"name"`
+	Value        string               `json:"value"`
+	CollectionId string               `json:"collectionId"`
+	ProjectId    string               `json:"projectId"`
+	Type         enums.DefinitionType `json:"type"`
 }
 
 type UpdateDefinition struct {

@@ -21,4 +21,9 @@ func SetupProjectRoutes(app *fiber.App, db *projectRepository.ProjectRepository,
 	projectGroup.Get("/", projectHandler.Paginate)
 	projectGroup.Put("/", projectHandler.Update)
 	projectGroup.Delete("/:id", projectHandler.Delete)
+	projectGroup.Post("/secret/:id", projectHandler.GenerateSecret)
+
+	projectFeedGroup := app.Group("/projects-feed")
+
+	projectFeedGroup.Get("/:id", projectHandler.GetProjectFeed)
 }

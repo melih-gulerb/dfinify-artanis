@@ -19,3 +19,14 @@ type DashboardResponse struct {
 	CollectionCount int
 	DefinitionCount int
 }
+
+type ProjectFeed struct {
+	CollectionName  string
+	DefinitionId    string
+	DefinitionValue string
+}
+
+type DefinitionFeed struct {
+	DefinitionId    string `json:"definitionId"`
+	DefinitionValue string `json:"definitionValue"`
+}

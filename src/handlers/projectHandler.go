@@ -9,6 +9,8 @@ import (
 	"artanis/src/models/requests"
 	"artanis/src/models/responses"
 	"artanis/src/repositories/projectRepository"
+	"crypto/rand"
+	"encoding/base64"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
@@ -117,6 +119,64 @@ func (h *ProjectHandler) GetDashboardCounts(c *fiber.Ctx) error {
 		Success: true,
 		Message: "counts successfully fetched",
 		Data:    counts,
+	})
+}
+
+func (h *ProjectHandler) GetProjectFeed(c *fiber.Ctx) error {
+	projectId := c.Params("id")
+	projectSecret := c.Query("secret")
+
+	err := h.db.ValidateSecret(projectId, projectSecret)
+	if err != nil {
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: "Invalid secret"})
+	}
+
+	projectFeed, err := h.db.GetProjectFeed(projectId)
+	if projectFeed == nil || err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(basemodal.Error{Message: "Project not found"})
+	}
+
+	collectionMap := make(map[string]map[string]interface{})
+	for _, projectFeedItem := range projectFeed {
+		collectionId := projectFeedItem.CollectionName
+
+		if _, exists := collectionMap[collectionId]; !exists {
+			collectionMap[collectionId] = make(map[string]interface{})
+		}
+
+		collectionMap[collectionId][projectFeedItem.DefinitionId] = projectFeedItem.DefinitionValue
+	}
+
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
+		Success: true,
+		Message: "success",
+		Data:    collectionMap,
+	})
+}
+
+func (h *ProjectHandler) GenerateSecret(c *fiber.Ctx) error {
+	tokenUser := c.Context().UserValue("user").(*clientmodal.User)
+	if tokenUser.OrganizationRole == enums.OrganizationUser {
+		return c.Status(fiber.StatusForbidden).JSON(basemodal.Error{Message: "Not enough credentials to generate a project secret"})
+	}
+
+	projectId := c.Params("id")
+
+	secretBytes := make([]byte, 32)
+	if _, err := rand.Read(secretBytes); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to generate secret"})
+	}
+
+	secret := base64.URLEncoding.EncodeToString(secretBytes)
+
+	if err := h.db.UpdateProjectSecret(projectId, secret); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: "Failed to store project secret"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
+		Success: true,
+		Message: "Project secret successfully generated",
+		Data:    secret,
 	})
 }
 

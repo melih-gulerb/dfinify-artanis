@@ -54,3 +54,29 @@ WHERE
 GROUP BY
     p.OrganizationId;`
 }
+
+var GetProjectFeed = func() string {
+	return `
+select c.Name as CollectionName, d.Id as DefinitionId, d.Value as DefinitionValue
+from Projects p
+         join dbo.Collections c on p.Id = c.ProjectId
+         join dbo.Definitions d on c.Id = d.CollectionId
+where p.Id = @projectId
+  and p.DeletedAt is null
+  and c.DeletedAt is null;`
+}
+
+var ValidateSecret = func() string {
+	return `
+select Id
+from Projects
+where Id = @Id and Secret = @Secret`
+}
+
+var UpdateSecret = func() string {
+	return `
+UPDATE dbo.Projects 
+SET Secret = @Secret
+WHERE Id = @Id
+`
+}

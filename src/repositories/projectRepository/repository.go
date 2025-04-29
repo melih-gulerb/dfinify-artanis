@@ -5,6 +5,7 @@ import (
 	"artanis/src/models/entities"
 	"artanis/src/models/responses"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -104,4 +105,50 @@ func (repo *ProjectRepository) GetDashboardCounts(organizationId string) (respon
 	}
 
 	return dashboard, nil
+}
+
+func (repo *ProjectRepository) GetProjectFeed(projectId string) ([]responses.ProjectFeed, error) {
+	var projectFeeds []responses.ProjectFeed
+
+	rows, err := repo.DB.Query(GetProjectFeed(), sql.Named("ProjectId", projectId))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var projectFeed responses.ProjectFeed
+		err := rows.Scan(&projectFeed.CollectionName, &projectFeed.DefinitionId, &projectFeed.DefinitionValue)
+		if err != nil {
+			logging.Log(logging.ERROR, err.Error())
+			return nil, err
+		}
+		projectFeeds = append(projectFeeds, projectFeed)
+	}
+
+	return projectFeeds, nil
+}
+
+func (repo *ProjectRepository) ValidateSecret(projectId, secret string) error {
+	var foundProjectId string
+	err := repo.DB.QueryRow(ValidateSecret(), sql.Named("Id", projectId), sql.Named("Secret", secret)).Scan(&foundProjectId)
+	if err != nil {
+		return err
+	}
+	if foundProjectId != projectId {
+		return errors.New("invalid secret")
+	}
+
+	return nil
+}
+
+func (repo *ProjectRepository) UpdateProjectSecret(id, secret string) error {
+	_, err := repo.DB.Exec(UpdateSecret(),
+		sql.Named("Id", id),
+		sql.Named("Secret", secret))
+	if err != nil {
+		logging.Log(logging.ERROR, err.Error())
+	}
+
+	return err
 }
