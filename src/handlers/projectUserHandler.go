@@ -43,7 +43,7 @@ func (h *ProjectUserHandler) Register(c *fiber.Ctx) error {
 	})
 }
 
-func (h *ProjectUserHandler) Update(c *fiber.Ctx) error {
+func (h *ProjectUserHandler) UpdateProjectUserRole(c *fiber.Ctx) error {
 	projectUserId := c.Params("id")
 	role := c.QueryInt("role")
 
@@ -76,24 +76,6 @@ func (h *ProjectUserHandler) Paginate(c *fiber.Ctx) error {
 	projectId := c.Params("id")
 
 	projectUsers := h.repository.Paginate(projectId, limit, offset)
-	userIds := make([]string, len(projectUsers))
-	for i, user := range projectUsers {
-		userIds[i] = user.UserId
-	}
-
-	userInformation, err := h.divineShield.GetUserInformationBulk(userIds)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(basemodal.Error{Message: err.Error()})
-	}
-
-	for _, information := range *userInformation {
-		for _, user := range projectUsers {
-			if user.UserId == information.Id {
-				user.UserMail = information.Email
-				user.Username = information.Name
-			}
-		}
-	}
 
 	return c.Status(fiber.StatusOK).JSON(basemodal.Response{
 		Success: true,

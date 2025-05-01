@@ -17,5 +17,8 @@ func SetupProjectUserRoutes(app *fiber.App, db *projectUserRepository.ProjectUse
 	divineShield := clients.NewDivineShieldClient(cfg.DivineShieldBaseUrl)
 	projectUserGroup.Use(middlewares.AuthorizationMiddleware(divineShield))
 
-	projectUserGroup.Get("/assign", projectUserHandler.AssignUser)
+	projectUserGroup.Post("/", projectUserHandler.Register)
+	projectUserGroup.Put("/:id", projectUserHandler.UpdateProjectUserRole)
+	projectUserGroup.Delete("/:id", projectUserHandler.Delete)
+	projectUserGroup.Delete("/:id", projectUserHandler.Paginate)
 }
